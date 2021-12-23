@@ -1,0 +1,16 @@
+cargo-features = [ "per-package-target" ]
+
+[package]
+name = "embed-wasm-runtime"
+version = "0.1.0"
+authors = ["Andreas Schaeffer <hanack@nooblounge.net>"]
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+default-run = "embed-wasm-runtime"
+
+[dependencies]
+wasmtime = "0.30"
+
+[[bin]]
+name = "embed-wasm-runtime"

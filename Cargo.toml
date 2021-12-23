@@ -1,0 +1,17 @@
+cargo-features = [ "per-package-target", "strip" ]
+
+[workspace]
+
+members = [
+    "1-compile-rust-to-wasm",
+    "2-embed-wasm-runtime",
+    "3-rust-wasm-library",
+    "4-use-host-functionality"
+]
+
+[profile.release]
+# opt-level = "s" --> execution speed
+# opt-level = "z" --> binary size
+opt-level = "z"
+lto = true
+strip = "symbols"

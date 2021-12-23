@@ -1,0 +1,13 @@
+cargo-features = [ "per-package-target" ]
+
+[package]
+name = "rust-wasm-library"
+version = "0.1.0"
+authors = ["Andreas Schaeffer <hanack@nooblounge.net>"]
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+forced-target = "wasm32-unknown-unknown"
+
+[lib]
+crate-type = ['cdylib']
