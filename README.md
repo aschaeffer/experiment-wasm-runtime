@@ -5,14 +5,14 @@ Experiment mit WASM
 ## Ausgangslage + Problem(e)
 
 Inexor soll erweiterbar sein. Die "Zentrale" bildet das Entity System. Es soll darüber hinaus
-möglich sein, eine Scriptsprache zum Erweitern und Modden zu verwenden. Beispielsweise könnten
+möglich sein, eine Skriptsprache zum Erweitern und Modden zu verwenden. Beispielsweise könnten
 Game-Modes oder Anti-Cheats dynamisch nachgeliefert werden, ohne, dass die Inexor-Rust-Binary
 ausgetauscht werden müsste. (oder ein Entity-Behaviour)
 
 Bisher (C++) wurde versucht die Google V8 Engine einzubetten. Lua kommt aus diversen Gründen
-nicht als (zumindest alleinige) Script-Sprache infrage. JavaScript schien geeigneter. Erstens
+nicht als (zumindest alleinige) Skriptsprache infrage. JavaScript schien geeigneter. Erstens
 wegen der Mächtigkeit der Sprache im Vergleich zu LUA. Zweitens wegen der Kenntnis vieler
-Entwickler von der Sprache. Drittens, weil Scriptsprache für die Engine und Sprache für das
+Entwickler von der Sprache. Drittens, weil Skriptsprache für die Engine und Sprache für das
 User Interface dieselbe wäre. Das sind mehrere gute Gründe, doch musste leidlich die Erfahrung
 gemacht werden, dass das Einbetten von V8 nicht trivial ist und Nachteile zustande kommen, die
 mit Lua nicht vorhanden waren. Lua ist hingegen ist leichtgewichtig und verhältnismäßig einfach
@@ -33,10 +33,10 @@ WASM-Runtime ist aber nicht auf den Webbrowser beschränkt. Und genau hier wird 
 denn Inexor könnte eine WASM-Runtime einbinden und wäre in der Lage, Module dynamisch zu laden
 und auszuführen. Die Runtime könnte mit dem Entity-System gekoppelt werden, sodass man
 mithilfe dieser Module das Entity-System steuern kann. So könnten beispielsweise Game-Modes,
-aufwändige Map-Logiken, Anti-Cheats, Mapper-Tools, Entity-System-Erweiterungen usw. ganz
-klassisch als Modul bereitgestellt werden. Welche Ausgangssprache für das Modul verwendet
-wurde, ist dabei zweitrangig. Bonus ist sicherlich, dass man Rust und Go nativ zu WebAssembly
-kompilieren kann.
+aufwändige Map-Logiken, Anti-Cheats, Mapper-Tools, Entity-System-Erweiterungen wie ein neues
+Partikel-Emitter-Verhalten usw. ganz klassisch als Modul bereitgestellt werden. Welche
+Ausgangssprache für das Modul verwendet wurde, ist dabei zweitrangig. Bonus ist sicherlich,
+dass man Rust und Go nativ zu WebAssembly kompilieren kann.
 
 ## Ziele / Investigations
 
@@ -48,14 +48,18 @@ kompilieren kann.
   - → Nein, wer Rust kann und wer schon mal eine Rust-Library erstellt hat, kann es sich prinzipiell mit sehr wenig Aufwand aneignen
 - [x] Wie schnell kompilieren solche Module?
   - → Wenn mit Rust, ist es die normale Rust-Geschwindigkeit
+  - → Bei anderen Programmiersprachen wird es ähnlich sein, sie werden in ihrer normalen Geschwindigkeit kompiliert
+- [x] Was wird benötigt, um solche Module zu kompilieren?
+  - → Für Rust gilt: nichts Besonderes. Man kann ganz normal den Paketmanager Cargo verwenden und mit Rustup kann man die notwendigen Build-Target-Typen installieren
 - [x] Wie groß sind solche Module?
   - → Sehr klein(!), aber nur, wenn optimiert (release build)
+- [x] Wie schnell sind solche Module?
+  - → Sehr schnell(!) - man muss jedoch beachten, ob man eher nach Größe oder nach Geschwindigkeit optimieren möchte
 - [x] Wie sieht ein WASM-Modul in Rust aus?
   - → Binary (also mit main-Funktion)  → `1-compile-rust-to-wasm`
   - → Library (also mit exportierten Funktionsnamen) → `3-rust-wasm-library`
-- [x] Wie kann man Funktionalitäten des Host-Systems (also des Entity-Systems) verwenden?
-- [x] Kann man von den WASM-Modulen vernünftig auf eine API zugreifen, insbesondere auf die Entity-System-API?
-  - → Hostsystems exportiert Funktion, WASM-Library verwendet Funktion des Hostsystems → `4-use-host-functionality`
+- [x] Wie kann man Funktionalitäten des Host-Systems (also des Entity-Systems) verwenden und kann man von den WASM-Modulen vernünftig auf eine API zugreifen, insbesondere auf die Entity-System-API?
+  - → Das Hostsystem exportiert Funktionen, die in einem WASM-Modul importiert werden können → `4-use-host-functionality`
 
 ### Teil 2
 
@@ -115,6 +119,22 @@ Ein EntityType `SinnDesLebens` könnte beispielsweise in Web-Assembly implementi
 | Python     | Nein         | Ja   |
 | Lua        | Nein         | ?    |
 
+## Anhang 4: Abgrenzung Plugin-System zu WASM Runtime
+
+In Inexor Reactive Graph Flow gibt es bereits ein Plugin-System. Dieses ist erstens
+für die grundlegenden Funktionalitäten gedacht. Auch die WASM-Runtime wird als
+Plugin bereitgestellt. Plugins haben außerdem vollen Zugriff, weil sie nicht in
+einer Sandbox laufen. Das bedeutet, dass nur Plugins eine Rust-MQTT-Bibliothek
+nutzen können. Innerhalb der Sandbox in der WASM-Runtime hat man nur Zugriff auf
+das Entity-System.
+
+|                                              | Plugin | WASM |
+|----------------------------------------------|--------|------|
+| Behaviours (Entity, Relation)                | Ja     | Ja   |
+| Provider (Component, Entity, Relation, Flow) | Ja     | Ja   |
+| Sandbox                                      | Nein   | Ja   |
+| Nutzung von (nativen) Bibliotheken           | Ja     | Nein |
+
 ## Lektüre
 
 * https://archium.org/index.php/Der_Go-Webassembly-Spicker
@@ -122,3 +142,4 @@ Ein EntityType `SinnDesLebens` könnte beispielsweise in Web-Assembly implementi
 * https://wasmtime.dev/
   * https://docs.wasmtime.dev/lang-rust.html
 * https://www.heise.de/news/State-of-WebAssembly-2021-Beliebteste-Sprache-fuer-Wasm-Anwendungen-ist-Rust-6115317.html
+* https://surma.dev/things/js-to-asc/
